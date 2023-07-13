@@ -8,11 +8,6 @@ This is a simple RESTful API for a blogging platform built with Go.
 - User management: create, update, delete user profiles
 - Post management: create, update, delete blog posts
 
-## Prerequisites
-
-- Go (version X.X.X)
-- PostgreSQL database
-
 ## API Endpoints
 
 ### User Endpoints

@@ -1,13 +1,17 @@
 package main
 
 import (
+	"fmt"
 	"log"
 	"net/http"
 	"os"
 
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo"
-	"github.com/orhanfatih/blog-api/api"
+	"github.com/orhanfatih/blog-api/models"
+	"github.com/orhanfatih/blog-api/server"
+	"gorm.io/driver/postgres"
+	"gorm.io/gorm"
 )
 
 func main() {
@@ -17,21 +21,30 @@ func main() {
 		log.Fatalf("failed to load environment variables: %s", err)
 	}
 
-	e := echo.New()
-	g := e.Group("/api/v1")
+	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Europe/Istanbul", os.Getenv("POSTGRES_HOST"), os.Getenv("POSTGRES_USER"), os.Getenv("POSTGRES_PASSWORD"), os.Getenv("POSTGRES_DB"), os.Getenv("POSTGRES_PORT"))
+
+	db, err := gorm.Open(postgres.Open(dsn), &gorm.Config{})
+	if err != nil {
+		panic(err)
+	}
+
+	db.AutoMigrate(&models.User{})
+
+	srv := server.NewServer()
+	g := srv.E.Group("/v1")
 
 	g.GET("", func(c echo.Context) error {
 		return c.String(http.StatusOK, "Blog API")
 	})
 
-	api.RegisterAuthRoutes(g)
+	srv.RegisterAuthRoutes(g)
 
 	port := os.Getenv("SERVER_PORT")
 	if port == "" {
 		log.Fatal("SERVER_PORT is not specified in the .env file")
 	}
 
-	if err := e.Start(":" + port); err != http.ErrServerClosed {
+	if err := srv.E.Start(":" + port); err != http.ErrServerClosed {
 		log.Fatal(err)
 	}
 }
