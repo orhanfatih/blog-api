@@ -5,18 +5,31 @@ import (
 	"gorm.io/gorm"
 )
 
-type AuthRepository interface {
-	CreateUser(user *models.SignUpRequest) (*models.SignUpRequest, error)
+type AuthStore interface {
+	CreateUser(user *models.User) error
+	FindUser(user *models.User, email string) (*models.User, error)
 }
 
-type authRepository struct {
+type AuthRepository struct {
 	db *gorm.DB
 }
 
-func NewAuthRepository(db *gorm.DB) AuthRepository {
-	return &authRepository{db: db}
+func NewAuthRepository(db *gorm.DB) *AuthRepository {
+	return &AuthRepository{db: db}
 }
 
-func (repo authRepository) CreateUser(user *models.SignUpRequest) (*models.SignUpRequest, error) {
+func (repo AuthRepository) CreateUser(user *models.User) error {
+	tx := repo.db.Create(user)
+	if tx.Error != nil {
+		return tx.Error
+	}
+	return nil
+}
+
+func (repo AuthRepository) FindUser(user *models.User, email string) (*models.User, error) {
+	tx := repo.db.First(&user, "email = ?", email)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
 	return user, nil
 }

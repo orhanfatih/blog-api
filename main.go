@@ -9,6 +9,7 @@ import (
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo"
 	"github.com/orhanfatih/blog-api/models"
+	"github.com/orhanfatih/blog-api/repository"
 	"github.com/orhanfatih/blog-api/server"
 	"gorm.io/driver/postgres"
 	"gorm.io/gorm"
@@ -30,7 +31,8 @@ func main() {
 
 	db.AutoMigrate(&models.User{})
 
-	srv := server.NewServer()
+	store := repository.NewAuthRepository(db)
+	srv := server.NewServer(store)
 	g := srv.E.Group("/v1")
 
 	g.GET("", func(c echo.Context) error {

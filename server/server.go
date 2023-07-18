@@ -8,9 +8,10 @@ import (
 type Server struct {
 	E *echo.Echo
 
-	AuthRepository repository.AuthRepository
+	store repository.AuthStore
 }
 
-func NewServer() *Server {
-	return &Server{E: echo.New()}
+func NewServer(store repository.AuthStore) *Server {
+	return &Server{E: echo.New(),
+		store: store}
 }
