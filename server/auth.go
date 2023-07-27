@@ -2,6 +2,7 @@ package server
 
 import (
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/labstack/echo"
@@ -23,7 +24,7 @@ func (s *Server) handleRegister(c echo.Context) error {
 
 	// pwd match
 	if r.Password != r.PasswordConfirm {
-		return c.String(http.StatusBadRequest, "Passwords are not match!")
+		return c.String(http.StatusBadRequest, "Passwords do not match!")
 	}
 
 	// hash pwd
@@ -58,15 +59,21 @@ func (s *Server) handleLogin(c echo.Context) error {
 	u, err := s.store.FindUser(u, r.Email)
 	if err != nil {
 		return c.String(http.StatusBadGateway, err.Error())
-
 	}
+
 	// check if pwd of loginRequest match with real pwd
 	if err = bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(r.Password)); err != nil {
 		return c.String(http.StatusBadRequest, "wrong password!")
 	}
 
-	// now create a token, return to user
-	return c.String(http.StatusOK, "successful login")
+	// now create a token, return
+	token, err := CreateToken(u.ID, time.Hour, os.Getenv("JWT_SECRET"))
+	if err != nil {
+		c.String(http.StatusBadRequest, ("status: fail" + "message" + err.Error()))
+	}
 
-	// return nil
+	c.Response().Header().Set("Authorization", "Bearer "+token)
+	c.String(http.StatusOK, "Login successful")
+
+	return nil
 }
