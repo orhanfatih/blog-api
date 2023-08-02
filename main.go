@@ -29,10 +29,11 @@ func main() {
 		panic(err)
 	}
 
-	db.AutoMigrate(&models.User{})
+	db.AutoMigrate(&models.User{}, &models.Post{})
 
-	store := repository.NewAuthRepository(db)
-	srv := server.NewServer(store)
+	authStore := repository.NewAuthRepository(db)
+	postStore := repository.NewPostRepository(db)
+	srv := server.NewServer(authStore, postStore)
 	g := srv.E.Group("/v1")
 
 	g.GET("", func(c echo.Context) error {
@@ -40,6 +41,7 @@ func main() {
 	})
 
 	srv.RegisterAuthRoutes(g)
+	srv.RegisterPostRoutes(g)
 
 	port := os.Getenv("SERVER_PORT")
 	if port == "" {

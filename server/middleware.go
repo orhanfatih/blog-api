@@ -2,18 +2,21 @@ package server
 
 import (
 	"fmt"
+	"net/http"
 	"os"
+	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt/v4"
+	"github.com/labstack/echo"
 )
 
 func CreateToken(id uint, expiration time.Duration, secretKey string) (string, error) {
 	claims := jwt.MapClaims{
 		"sub": id,
 		"iss": "blog-api",
-		"iat": time.Now().Unix(),
-		"exp": time.Now().Add(expiration).Unix(),
+		"iat": time.Now().UTC().Unix(),
+		"exp": time.Now().Add(expiration).UTC().Unix(),
 	}
 
 	// create a new token
@@ -48,5 +51,34 @@ func ValidateToken(tokenString string) (jwt.MapClaims, error) {
 	if !ok || !token.Valid {
 		return nil, err
 	}
+
 	return claims, nil
+}
+
+func AuthenticateUser(next echo.HandlerFunc) echo.HandlerFunc {
+	return func(c echo.Context) error {
+		// Get the access token from the cookie
+		cookie, err := c.Cookie("access-token")
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, err.Error())
+		}
+
+		// Validate the token
+		claims, err := ValidateToken(cookie.Value)
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, err.Error())
+		}
+
+		// Extract the user ID from the claims
+		userID, err := strconv.Atoi(fmt.Sprint(claims["sub"]))
+		if err != nil {
+			return c.JSON(http.StatusBadRequest, err.Error())
+		}
+
+		// Set the user ID in the request context for later use in the route handler
+		c.Set("userID", userID)
+
+		// Proceed to the next middleware or the route handler
+		return next(c)
+	}
 }
