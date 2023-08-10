@@ -10,9 +10,10 @@ type Server struct {
 
 	authStore repository.AuthStore
 	postStore repository.PostStore
+	userStore repository.UserStore
 }
 
-func NewServer(authStore repository.AuthStore, postStore repository.PostStore) *Server {
+func NewServer(authStore repository.AuthStore, postStore repository.PostStore, userStore repository.UserStore) *Server {
 	return &Server{E: echo.New(),
-		authStore: authStore, postStore: postStore}
+		authStore: authStore, postStore: postStore, userStore: userStore}
 }

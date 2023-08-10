@@ -10,6 +10,7 @@ type PostStore interface {
 	FindPost(post *models.Post, postID int) (*models.Post, error)
 	UpdatePost(post, updated *models.Post) error
 	DeletePost(postId int) error
+	FindPosts(limit, offset int) ([]*models.Post, error)
 }
 
 type PostRepository struct {
@@ -50,4 +51,13 @@ func (repo PostRepository) DeletePost(postId int) error {
 		return tx.Error
 	}
 	return nil
+}
+
+func (repo PostRepository) FindPosts(limit, offset int) ([]*models.Post, error) {
+	var posts []*models.Post
+	tx := repo.db.Limit(limit).Offset(offset).Find(&posts)
+	if tx.Error != nil {
+		return nil, tx.Error
+	}
+	return posts, nil
 }

@@ -12,10 +12,11 @@ import (
 func (s *Server) RegisterPostRoutes(g *echo.Group) {
 	router := g.Group("/posts")
 	router.Use(AuthenticateUser)
-	router.POST("", s.handleCreatePost)
+	router.POST("/", s.handleCreatePost)
 	router.GET("/:id", s.handleGetPost)
 	router.PUT("/:id", s.handleUpdatePost)
 	router.DELETE("/:id", s.handleDeletePost)
+	router.GET("/", s.handleExplorePosts)
 }
 
 func (s *Server) handleCreatePost(c echo.Context) error {
@@ -62,6 +63,7 @@ func (s *Server) handleGetPost(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, p)
 }
+
 func (s *Server) handleUpdatePost(c echo.Context) error {
 
 	userID, ok := c.Get("userID").(int)
@@ -97,6 +99,7 @@ func (s *Server) handleUpdatePost(c echo.Context) error {
 
 	return c.JSON(http.StatusOK, p)
 }
+
 func (s *Server) handleDeletePost(c echo.Context) error {
 
 	postID, err := strconv.Atoi(c.Param("id"))
@@ -109,4 +112,27 @@ func (s *Server) handleDeletePost(c echo.Context) error {
 	}
 
 	return c.JSON(http.StatusNoContent, nil)
+}
+
+func (s *Server) handleExplorePosts(c echo.Context) error {
+	pageStr := c.QueryParams().Get("page")
+	limitStr := c.QueryParams().Get("limit")
+
+	page, err := strconv.Atoi(pageStr)
+	if err != nil || page < 1 {
+		page = 1
+	}
+	limit, err := strconv.Atoi(limitStr)
+	if err != nil || limit < 1 {
+		limit = 5
+	}
+
+	offset := (page - 1) * limit
+
+	posts, err := s.postStore.FindPosts(limit, offset)
+	if err != nil {
+		return c.JSON(http.StatusBadRequest, err.Error())
+	}
+
+	return c.JSON(http.StatusOK, posts)
 }

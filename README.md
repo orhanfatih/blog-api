@@ -8,6 +8,9 @@ This is a simple RESTful API for a blogging platform built with Go.
 - User management: create, read, update, delete user profiles
 - Post management: create, read, update, delete blog posts
 
+### Tech Stack
+- Go, Echo, Gorm, PostgreSQL, JWT
+
 ## API Endpoints
 
 ### Auth Endpoints
@@ -18,14 +21,14 @@ This is a simple RESTful API for a blogging platform built with Go.
 
 ### User Endpoints
 
-- `GET v1/users/me`: Get user profile
-- `PUT v1/users/`: Update user profile
-- `DELETE v1/users/`: Delete user profile
+- `GET v1/user/me`: Get user profile
+- `PATCH v1/user/`: Update user profile
+- `DELETE v1/user/`: Delete user profile
 
 ### Blog Post Endpoints
 
-- `POST v1/posts`: Create a new blog post
+- `POST v1/posts/`: Create a new blog post
 - `GET v1/posts/:id`: Get a blog post by ID
 - `PUT v1/posts/:id`: Update a blog post
 - `DELETE v1/posts/:id`: Delete a blog post
-
+- `GET v1/posts/`: Get blog posts

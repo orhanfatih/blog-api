@@ -33,7 +33,8 @@ func main() {
 
 	authStore := repository.NewAuthRepository(db)
 	postStore := repository.NewPostRepository(db)
-	srv := server.NewServer(authStore, postStore)
+	userStore := repository.NewUserRepository(db)
+	srv := server.NewServer(authStore, postStore, userStore)
 	g := srv.E.Group("/v1")
 
 	g.GET("", func(c echo.Context) error {
@@ -42,6 +43,7 @@ func main() {
 
 	srv.RegisterAuthRoutes(g)
 	srv.RegisterPostRoutes(g)
+	srv.RegisterUserRoutes(g)
 
 	port := os.Getenv("SERVER_PORT")
 	if port == "" {
