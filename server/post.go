@@ -23,13 +23,13 @@ func (s *Server) handleCreatePost(c echo.Context) error {
 
 	userID, ok := c.Get("userID").(int)
 	if !ok {
-		return c.JSON(http.StatusInternalServerError, "User ID not found in context")
+		return RespondWithError(c, http.StatusInternalServerError, "User ID not found in context")
 	}
 
 	// bind given post details to createPostRequest model
 	r := new(models.CreatePostRequest)
 	if err := c.Bind(r); err != nil {
-		return c.JSON(http.StatusBadRequest, err.Error())
+		return RespondWithError(c, http.StatusBadRequest, err.Error())
 	}
 
 	// create a Post
@@ -42,48 +42,48 @@ func (s *Server) handleCreatePost(c echo.Context) error {
 	}
 
 	if err := s.postStore.CreatePost(&p); err != nil {
-		return c.JSON(http.StatusBadRequest, err.Error())
+		return RespondWithError(c, http.StatusBadRequest, err.Error())
 	}
 
-	return c.JSON(http.StatusCreated, p)
+	return RespondWithJSON(c, http.StatusCreated, p)
 }
 
 func (s *Server) handleGetPost(c echo.Context) error {
 
 	postID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, "Invalid postid format, should be int")
+		return RespondWithError(c, http.StatusBadRequest, "Provide postid")
 	}
 
 	var post models.Post
 	p, err := s.postStore.FindPost(&post, postID)
 	if err != nil {
-		return c.JSON(http.StatusNotFound, err.Error())
+		return RespondWithError(c, http.StatusNotFound, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, p)
+	return RespondWithJSON(c, http.StatusOK, p)
 }
 
 func (s *Server) handleUpdatePost(c echo.Context) error {
 
 	userID, ok := c.Get("userID").(int)
 	if !ok {
-		return c.JSON(http.StatusInternalServerError, "User ID not found in context")
+		return RespondWithError(c, http.StatusInternalServerError, "User ID not found in context")
 	}
 	postID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, "Invalid postid format, should be int")
+		return RespondWithError(c, http.StatusBadRequest, "Provide postid")
 	}
 
 	r := new(models.UpdatePostRequest)
 	if err := c.Bind(r); err != nil {
-		return c.JSON(http.StatusBadRequest, err.Error())
+		return RespondWithError(c, http.StatusBadRequest, err.Error())
 	}
 
 	var post *models.Post
 	post, err = s.postStore.FindPost(post, postID)
 	if err != nil {
-		return c.JSON(http.StatusNotFound, err.Error())
+		return RespondWithError(c, http.StatusNotFound, err.Error())
 	}
 
 	p := models.Post{
@@ -94,24 +94,24 @@ func (s *Server) handleUpdatePost(c echo.Context) error {
 	}
 
 	if err = s.postStore.UpdatePost(post, &p); err != nil {
-		return c.JSON(http.StatusBadRequest, err.Error())
+		return RespondWithError(c, http.StatusBadRequest, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, p)
+	return RespondWithJSON(c, http.StatusOK, p)
 }
 
 func (s *Server) handleDeletePost(c echo.Context) error {
 
 	postID, err := strconv.Atoi(c.Param("id"))
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, "Invalid postid format, should be int")
+		return RespondWithError(c, http.StatusBadRequest, "Provide postid")
 	}
 
 	if err = s.postStore.DeletePost(postID); err != nil {
-		return c.JSON(http.StatusBadRequest, err.Error())
+		return RespondWithError(c, http.StatusBadRequest, err.Error())
 	}
 
-	return c.JSON(http.StatusNoContent, nil)
+	return RespondWithJSON(c, http.StatusNoContent, nil)
 }
 
 func (s *Server) handleExplorePosts(c echo.Context) error {
@@ -131,8 +131,8 @@ func (s *Server) handleExplorePosts(c echo.Context) error {
 
 	posts, err := s.postStore.FindPosts(limit, offset)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, err.Error())
+		return RespondWithError(c, http.StatusBadRequest, err.Error())
 	}
 
-	return c.JSON(http.StatusOK, posts)
+	return RespondWithJSON(c, http.StatusOK, posts)
 }

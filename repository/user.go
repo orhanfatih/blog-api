@@ -3,11 +3,12 @@ package repository
 import (
 	"github.com/orhanfatih/blog-api/models"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 type UserStore interface {
 	FindUser(userID int) (*models.User, error)
-	UpdateUser(userID int, updated *models.User) error
+	UpdateUser(userID int, updated *models.User) (*models.User, error)
 	DeleteUser(user *models.User) error
 }
 
@@ -28,13 +29,13 @@ func (repo UserRepository) FindUser(userID int) (*models.User, error) {
 	return me, nil
 }
 
-func (repo UserRepository) UpdateUser(userID int, updated *models.User) error {
-	tx := repo.db.Model(&models.User{}).Where("id = ?", userID).Updates(
-		&updated)
+func (repo UserRepository) UpdateUser(userID int, updated *models.User) (*models.User, error) {
+	var user models.User
+	tx := repo.db.Model(&user).Clauses(clause.Returning{}).Where("id = ?", userID).Updates(&updated)
 	if tx.Error != nil {
-		return tx.Error
+		return nil, tx.Error
 	}
-	return nil
+	return &user, nil
 }
 
 func (repo UserRepository) DeleteUser(user *models.User) error {

@@ -60,19 +60,19 @@ func AuthenticateUser(next echo.HandlerFunc) echo.HandlerFunc {
 		// Get the access token from the cookie
 		cookie, err := c.Cookie("access-token")
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err.Error())
+			return echo.NewHTTPError(http.StatusUnauthorized, "You must be logged in to access this resource.")
 		}
 
 		// Validate the token
 		claims, err := ValidateToken(cookie.Value)
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err.Error())
+			return echo.NewHTTPError(http.StatusUnauthorized, "Invalid token")
 		}
 
 		// Extract the user ID from the claims
 		userID, err := strconv.Atoi(fmt.Sprint(claims["sub"]))
 		if err != nil {
-			return c.JSON(http.StatusBadRequest, err.Error())
+			return echo.NewHTTPError(http.StatusUnauthorized, "Token sub extracting error")
 		}
 
 		// Set the user ID in the request context for later use in the route handler

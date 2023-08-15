@@ -20,18 +20,18 @@ func (s *Server) RegisterAuthRoutes(g *echo.Group) {
 func (s *Server) handleRegister(c echo.Context) error {
 	r := new(models.RegisterRequest)
 	if err := c.Bind(r); err != nil {
-		return c.JSON(http.StatusBadRequest, err.Error())
+		return RespondWithError(c, http.StatusBadRequest, err.Error())
 	}
 
 	// pwd match
 	if r.Password != r.PasswordConfirm {
-		return c.JSON(http.StatusBadRequest, "Passwords do not match!")
+		return RespondWithError(c, http.StatusBadRequest, "Passwords do not match!")
 	}
 
 	// hash pwd
 	hash, err := bcrypt.GenerateFromPassword([]byte(r.Password), 10)
 	if err != nil {
-		return c.JSON(http.StatusBadRequest, err.Error())
+		return RespondWithError(c, http.StatusBadRequest, err.Error())
 	}
 
 	// create a User from registerRequest data
@@ -43,28 +43,28 @@ func (s *Server) handleRegister(c echo.Context) error {
 	}
 
 	if err = s.authStore.CreateUser(&u); err != nil {
-		return c.JSON(http.StatusInternalServerError, err.Error())
+		return RespondWithError(c, http.StatusInternalServerError, err.Error())
 	}
 
-	return c.JSON(http.StatusCreated, "success")
+	return RespondWithJSON(c, http.StatusCreated, "success")
 }
 
 func (s *Server) handleLogin(c echo.Context) error {
 	r := new(models.LoginRequest)
 	if err := c.Bind(r); err != nil {
-		return c.JSON(http.StatusBadRequest, err.Error())
+		return RespondWithError(c, http.StatusBadRequest, err.Error())
 	}
 
 	var u *models.User
 	// query db with email
 	u, err := s.authStore.FindUser(u, r.Email)
 	if err != nil {
-		return c.JSON(http.StatusInternalServerError, err.Error())
+		return RespondWithError(c, http.StatusInternalServerError, err.Error())
 	}
 
 	// check if pwd of loginRequest match with real pwd
 	if err = bcrypt.CompareHashAndPassword([]byte(u.Password), []byte(r.Password)); err != nil {
-		return c.JSON(http.StatusBadRequest, "Invalid login credientials!")
+		return RespondWithError(c, http.StatusBadRequest, "Invalid login credientials!")
 	}
 
 	// create a token
@@ -82,7 +82,7 @@ func (s *Server) handleLogin(c echo.Context) error {
 	}
 	c.SetCookie(&cookie)
 
-	return c.JSON(http.StatusOK, "success")
+	return RespondWithJSON(c, http.StatusOK, "success")
 }
 
 func (s *Server) handleLogout(c echo.Context) error {
@@ -95,5 +95,5 @@ func (s *Server) handleLogout(c echo.Context) error {
 	}
 	c.SetCookie(&cookie)
 
-	return c.JSON(http.StatusOK, "logout successful")
+	return RespondWithJSON(c, http.StatusOK, "logout successful")
 }
