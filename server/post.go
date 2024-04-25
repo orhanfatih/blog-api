@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/labstack/echo"
-	"github.com/orhanfatih/blog-api/models"
+	"github.com/orhanfatih/blog-api/model"
 )
 
 func (s *Server) RegisterPostRoutes(g *echo.Group) {
@@ -27,13 +27,13 @@ func (s *Server) handleCreatePost(c echo.Context) error {
 	}
 
 	// bind given post details to createPostRequest model
-	r := new(models.CreatePostRequest)
+	r := new(model.CreatePostRequest)
 	if err := c.Bind(r); err != nil {
 		return RespondWithError(c, http.StatusBadRequest, err.Error())
 	}
 
 	// create a Post
-	p := models.Post{
+	p := model.Post{
 		UserID:    uint(userID),
 		Title:     r.Title,
 		Content:   r.Content,
@@ -55,7 +55,7 @@ func (s *Server) handleGetPost(c echo.Context) error {
 		return RespondWithError(c, http.StatusBadRequest, "Provide postid")
 	}
 
-	var post models.Post
+	var post model.Post
 	p, err := s.postStore.FindPost(&post, postID)
 	if err != nil {
 		return RespondWithError(c, http.StatusNotFound, err.Error())
@@ -75,18 +75,18 @@ func (s *Server) handleUpdatePost(c echo.Context) error {
 		return RespondWithError(c, http.StatusBadRequest, "Provide postid")
 	}
 
-	r := new(models.UpdatePostRequest)
+	r := new(model.UpdatePostRequest)
 	if err := c.Bind(r); err != nil {
 		return RespondWithError(c, http.StatusBadRequest, err.Error())
 	}
 
-	var post *models.Post
+	var post *model.Post
 	post, err = s.postStore.FindPost(post, postID)
 	if err != nil {
 		return RespondWithError(c, http.StatusNotFound, err.Error())
 	}
 
-	p := models.Post{
+	p := model.Post{
 		UserID:    uint(userID),
 		Title:     r.Title,
 		Content:   r.Content,

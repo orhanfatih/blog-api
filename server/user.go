@@ -4,7 +4,7 @@ import (
 	"net/http"
 
 	"github.com/labstack/echo"
-	"github.com/orhanfatih/blog-api/models"
+	"github.com/orhanfatih/blog-api/model"
 )
 
 func (s *Server) RegisterUserRoutes(g *echo.Group) {
@@ -26,7 +26,7 @@ func (s *Server) handleGetMe(c echo.Context) error {
 		return RespondWithError(c, http.StatusInternalServerError, err.Error())
 	}
 
-	u := models.UserResponse{
+	u := model.UserResponse{
 		ID:        user.ID,
 		Name:      user.Name,
 		Email:     user.Email,
@@ -42,7 +42,7 @@ func (s *Server) handleUpdateProfile(c echo.Context) error {
 		return RespondWithError(c, http.StatusInternalServerError, "User ID not found in context")
 	}
 
-	r := new(models.User)
+	r := new(model.User)
 	if err := c.Bind(r); err != nil {
 		return RespondWithError(c, http.StatusBadRequest, err.Error())
 	}
@@ -52,7 +52,7 @@ func (s *Server) handleUpdateProfile(c echo.Context) error {
 		return RespondWithError(c, http.StatusInternalServerError, err.Error())
 	}
 
-	u := models.UserResponse{
+	u := model.UserResponse{
 		Name:      user.Name,
 		Email:     user.Email,
 		CreatedAt: user.CreatedAt,
@@ -62,7 +62,7 @@ func (s *Server) handleUpdateProfile(c echo.Context) error {
 }
 
 func (s *Server) handleDeleteProfile(c echo.Context) error {
-	e := new(models.User)
+	e := new(model.User)
 	if err := c.Bind(e); err != nil {
 		return RespondWithError(c, http.StatusBadRequest, err.Error())
 	}

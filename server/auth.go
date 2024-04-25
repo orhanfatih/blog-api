@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/labstack/echo"
-	"github.com/orhanfatih/blog-api/models"
+	"github.com/orhanfatih/blog-api/model"
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -18,7 +18,7 @@ func (s *Server) RegisterAuthRoutes(g *echo.Group) {
 }
 
 func (s *Server) handleRegister(c echo.Context) error {
-	r := new(models.RegisterRequest)
+	r := new(model.RegisterRequest)
 	if err := c.Bind(r); err != nil {
 		return RespondWithError(c, http.StatusBadRequest, err.Error())
 	}
@@ -35,7 +35,7 @@ func (s *Server) handleRegister(c echo.Context) error {
 	}
 
 	// create a User from registerRequest data
-	u := models.User{
+	u := model.User{
 		Name:      r.Name,
 		Email:     r.Email,
 		Password:  string(hash),
@@ -50,12 +50,12 @@ func (s *Server) handleRegister(c echo.Context) error {
 }
 
 func (s *Server) handleLogin(c echo.Context) error {
-	r := new(models.LoginRequest)
+	r := new(model.LoginRequest)
 	if err := c.Bind(r); err != nil {
 		return RespondWithError(c, http.StatusBadRequest, err.Error())
 	}
 
-	var u *models.User
+	var u *model.User
 	// query db with email
 	u, err := s.authStore.FindUser(u, r.Email)
 	if err != nil {

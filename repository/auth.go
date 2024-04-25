@@ -1,13 +1,13 @@
 package repository
 
 import (
-	"github.com/orhanfatih/blog-api/models"
+	"github.com/orhanfatih/blog-api/model"
 	"gorm.io/gorm"
 )
 
 type AuthStore interface {
-	CreateUser(user *models.User) error
-	FindUser(user *models.User, email string) (*models.User, error)
+	CreateUser(user *model.User) error
+	FindUser(user *model.User, email string) (*model.User, error)
 }
 
 type AuthRepository struct {
@@ -18,7 +18,7 @@ func NewAuthRepository(db *gorm.DB) *AuthRepository {
 	return &AuthRepository{db: db}
 }
 
-func (repo AuthRepository) CreateUser(user *models.User) error {
+func (repo AuthRepository) CreateUser(user *model.User) error {
 	tx := repo.db.Create(user)
 	if tx.Error != nil {
 		return tx.Error
@@ -26,7 +26,7 @@ func (repo AuthRepository) CreateUser(user *models.User) error {
 	return nil
 }
 
-func (repo AuthRepository) FindUser(user *models.User, email string) (*models.User, error) {
+func (repo AuthRepository) FindUser(user *model.User, email string) (*model.User, error) {
 	tx := repo.db.First(&user, "email = ?", email)
 	if tx.Error != nil {
 		return nil, tx.Error

@@ -32,3 +32,20 @@ This is a simple RESTful API for a blogging platform built with Go.
 - `PUT v1/posts/:id`: Update a blog post
 - `DELETE v1/posts/:id`: Delete a blog post
 - `GET v1/posts/`: Get blog posts
+
+## Requirements:
+
+* Docker
+
+# How to run
+
+## Running the Application
+
+1. **Set up environment variables:**
+   - Create a file named `.env` in the root directory of your project.
+   - Inside the `.env` file, define your environment variables (copy fields from .env.template) and fill values
+
+2. **Build and Run the application:**
+   ```bash
+   docker-compose up --build
+   ```

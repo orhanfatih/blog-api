@@ -8,7 +8,7 @@ import (
 
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo"
-	"github.com/orhanfatih/blog-api/models"
+	"github.com/orhanfatih/blog-api/model"
 	"github.com/orhanfatih/blog-api/repository"
 	"github.com/orhanfatih/blog-api/server"
 	"gorm.io/driver/postgres"
@@ -29,7 +29,7 @@ func main() {
 		panic(err)
 	}
 
-	db.AutoMigrate(&models.User{}, &models.Post{})
+	db.AutoMigrate(&model.User{}, &model.Post{})
 
 	authStore := repository.NewAuthRepository(db)
 	postStore := repository.NewPostRepository(db)
