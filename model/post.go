@@ -1,6 +1,10 @@
 package model
 
-import "time"
+import (
+	"time"
+
+	validation "github.com/go-ozzo/ozzo-validation"
+)
 
 type Post struct {
 	ID        uint      `gorm:"primaryKey" json:"id,omitempty"`
@@ -19,4 +23,11 @@ type CreatePostRequest struct {
 type UpdatePostRequest struct {
 	Title   string `json:"title,omitempty"`
 	Content string `json:"content,omitempty"`
+}
+
+func (p CreatePostRequest) Validate() error {
+	return validation.ValidateStruct(&p,
+		validation.Field(&p.Title, validation.Required, validation.Length(1, 16)),
+		validation.Field(&p.Content, validation.Length(1, 160)),
+	)
 }

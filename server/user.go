@@ -42,12 +42,16 @@ func (s *Server) handleUpdateProfile(c echo.Context) error {
 		return RespondWithError(c, http.StatusInternalServerError, "User ID not found in context")
 	}
 
-	r := new(model.User)
+	r := new(model.ProfileUpdateRequest)
 	if err := c.Bind(r); err != nil {
 		return RespondWithError(c, http.StatusBadRequest, err.Error())
 	}
 
-	user, err := s.userStore.UpdateUser(userID, r)
+	if err := r.Validate(); err != nil {
+		return RespondWithError(c, http.StatusBadRequest, err.Error())
+	}
+
+	user, err := s.userStore.UpdateUser(userID, &model.User{Name: r.Name, Email: r.Email})
 	if err != nil {
 		return RespondWithError(c, http.StatusInternalServerError, err.Error())
 	}

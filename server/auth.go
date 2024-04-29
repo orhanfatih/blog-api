@@ -23,9 +23,8 @@ func (s *Server) handleRegister(c echo.Context) error {
 		return RespondWithError(c, http.StatusBadRequest, err.Error())
 	}
 
-	// pwd match
-	if r.Password != r.PasswordConfirm {
-		return RespondWithError(c, http.StatusBadRequest, "Passwords do not match!")
+	if err := r.Validate(); err != nil {
+		return RespondWithError(c, http.StatusBadRequest, err.Error())
 	}
 
 	// hash pwd
@@ -52,6 +51,10 @@ func (s *Server) handleRegister(c echo.Context) error {
 func (s *Server) handleLogin(c echo.Context) error {
 	r := new(model.LoginRequest)
 	if err := c.Bind(r); err != nil {
+		return RespondWithError(c, http.StatusBadRequest, err.Error())
+	}
+
+	if err := r.Validate(); err != nil {
 		return RespondWithError(c, http.StatusBadRequest, err.Error())
 	}
 

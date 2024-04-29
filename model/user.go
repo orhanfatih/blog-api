@@ -1,6 +1,12 @@
 package model
 
-import "time"
+import (
+	"errors"
+	"time"
+
+	validation "github.com/go-ozzo/ozzo-validation"
+	"github.com/go-ozzo/ozzo-validation/is"
+)
 
 type User struct {
 	ID        uint      `gorm:"primaryKey"`
@@ -27,4 +33,35 @@ type UserResponse struct {
 	Name      string    `json:"name,omitempty"`
 	Email     string    `json:"email,omitempty"`
 	CreatedAt time.Time `json:"createdat,omitempty"`
+}
+
+func (l LoginRequest) Validate() error {
+	return validation.ValidateStruct(&l,
+		validation.Field(&l.Email, validation.Required, is.Email),
+		validation.Field(&l.Password, validation.Required, validation.Length(8, 150)),
+	)
+}
+
+func (r RegisterRequest) Validate() error {
+	if r.Password != r.PasswordConfirm {
+		return errors.New("passwords do not match")
+	}
+
+	return validation.ValidateStruct(&r,
+		validation.Field(&r.Email, validation.Required, is.Email),
+		validation.Field(&r.Password, validation.Required, validation.Length(8, 150)),
+		validation.Field(&r.PasswordConfirm, validation.Required, validation.Length(8, 150)),
+	)
+}
+
+type ProfileUpdateRequest struct {
+	Email string `json:"email" binding:"required,email"`
+	Name  string `json:"name" binding:"required"`
+}
+
+func (p ProfileUpdateRequest) Validate() error {
+	return validation.ValidateStruct(&p,
+		validation.Field(&p.Email, validation.Required, is.Email),
+		validation.Field(&p.Name, validation.Length(1, 16)),
+	)
 }

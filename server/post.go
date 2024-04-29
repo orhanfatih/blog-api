@@ -32,6 +32,10 @@ func (s *Server) handleCreatePost(c echo.Context) error {
 		return RespondWithError(c, http.StatusBadRequest, err.Error())
 	}
 
+	if err := r.Validate(); err != nil {
+		return RespondWithError(c, http.StatusBadRequest, err.Error())
+	}
+
 	// create a Post
 	p := model.Post{
 		UserID:    uint(userID),
@@ -93,11 +97,12 @@ func (s *Server) handleUpdatePost(c echo.Context) error {
 		UpdatedAt: time.Now(),
 	}
 
-	if err = s.postStore.UpdatePost(post, &p); err != nil {
+	updated, err := s.postStore.UpdatePost(post, &p)
+	if err != nil {
 		return RespondWithError(c, http.StatusBadRequest, err.Error())
 	}
 
-	return RespondWithJSON(c, http.StatusOK, p)
+	return RespondWithJSON(c, http.StatusOK, updated)
 }
 
 func (s *Server) handleDeletePost(c echo.Context) error {

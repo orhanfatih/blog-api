@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"errors"
+
 	"github.com/orhanfatih/blog-api/model"
 	"gorm.io/gorm"
 )
@@ -8,7 +10,7 @@ import (
 type PostStore interface {
 	CreatePost(post *model.Post) error
 	FindPost(post *model.Post, postID int) (*model.Post, error)
-	UpdatePost(post, updated *model.Post) error
+	UpdatePost(post, updated *model.Post) (*model.Post, error)
 	DeletePost(postId int) error
 	FindPosts(limit, offset int) ([]*model.Post, error)
 }
@@ -34,21 +36,27 @@ func (repo PostRepository) FindPost(post *model.Post, postID int) (*model.Post, 
 	if tx.Error != nil {
 		return nil, tx.Error
 	}
+	if tx.RowsAffected == 0 {
+		return nil, errors.New("not existing/valid postId")
+	}
 	return post, nil
 }
 
-func (repo PostRepository) UpdatePost(post, updated *model.Post) error {
-	tx := repo.db.Model(post).Updates(updated)
+func (repo PostRepository) UpdatePost(post, updated *model.Post) (*model.Post, error) {
+	tx := repo.db.Model(&model.Post{}).Where("id = ?", post.ID).Updates(updated).Scan(&updated)
 	if tx.Error != nil {
-		return tx.Error
+		return nil, tx.Error
 	}
-	return nil
+	return updated, nil
 }
 
 func (repo PostRepository) DeletePost(postId int) error {
 	tx := repo.db.Delete(&model.Post{}, "id = ?", postId)
 	if tx.Error != nil {
 		return tx.Error
+	}
+	if tx.RowsAffected == 0 {
+		return errors.New("postId doesnt exists")
 	}
 	return nil
 }
