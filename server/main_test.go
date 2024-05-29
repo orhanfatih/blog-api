@@ -45,9 +45,11 @@ func TestMain(m *testing.M) {
 }
 
 func mockDatabase() *gorm.DB {
-	err := godotenv.Load("../.env.test")
-	if err != nil {
-		log.Fatal("Error loading .env.test file")
+	if os.Getenv("CI") == "" {
+		err := godotenv.Load("../.env.test")
+		if err != nil {
+			log.Fatalf("failed to load environment variables: %s", err)
+		}
 	}
 
 	dsn := fmt.Sprintf("host=%s user=%s password=%s dbname=%s port=%s sslmode=disable TimeZone=Europe/Istanbul", os.Getenv("POSTGRES_HOST"), os.Getenv("POSTGRES_USER"), os.Getenv("POSTGRES_PASSWORD"), os.Getenv("POSTGRES_DB"), os.Getenv("POSTGRES_PORT"))
